@@ -3,4 +3,4 @@
 
 ## Developers (หรือ Team Members)
 * Pattaradanai Chaitan (660510667)
-* Purich Saenasang (660510670)
+* Purich Senasang (660510670)
