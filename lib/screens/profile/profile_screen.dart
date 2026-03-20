@@ -5,8 +5,10 @@
  * - แสดงข้อมูลผู้ใช้งาน (ชื่อ, รูปโปรไฟล์)
  * - แสดงสถิติจำนวนการโพสต์ และคะแนนรีวิวเฉลี่ย
  * - แสดงรายการสูตรอาหารและงานที่ผู้ใช้นี้เคยโพสต์
+ * - สามารถกด logout ในหน้า profile ได้
  * Author: Pattaradanai Chaitan (พัฒนาระบบแสดงผลรายการสูตรอาหาร และระบบคำนวณ/แสดงผล Rating)
- * Co-Author: Purich Saenasang (พัฒนาระบบปุ่มสลับโหมด, รายการประกาศรับสมัครงาน และโครงสร้าง UI หน้า Profile)
+ * Co-Author: Purich Saenasang (พัฒนาระบบปุ่มสลับโหมด, รายการประกาศรับสมัครงาน และโครงสร้าง UI หน้า Profile ปุ่ม setting ที่ logout ได้)
+ * Course: Mobile Application Development Framework
  */
 
 import 'package:flutter/material.dart';

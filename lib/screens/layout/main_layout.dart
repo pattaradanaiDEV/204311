@@ -5,6 +5,7 @@
  * - จัดการการสลับหน้าจอระหว่าง Home, Explore, Saved และ Profile
  * - ควบคุมและจัดเก็บสถานะโหมดการทำงานหลัก (Recipe / Job)
  * Author: Pattaradanai Chaitan, Purich Saenasang
+ * Course: Mobile Application Development Framework
  */
 
 import 'package:flutter/material.dart';

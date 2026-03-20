@@ -5,6 +5,7 @@
  * - จัดการการเข้าสู่ระบบ สมัครสมาชิก และออกจากระบบ
  * - บันทึกข้อมูลโปรไฟล์เริ่มต้นของผู้ใช้ใหม่ลง Firestore
  * Author: Purich Saenasang
+ * Course: Mobile Application Development Framework
  */
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

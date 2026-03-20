@@ -1,11 +1,11 @@
 /*
  * File: main.dart
- * Description: entry point ของ แอป MannotRobot
+ * Description: จุดเริ่มต้นการทำงาน (Entry Point) ของแอปพลิเคชัน MannotRobot
  * Responsibilities:
  * - เริ่มต้นการทำงานของ Flutter Framework, Firebase และการตั้งค่าสภาพแวดล้อมต่างๆ
  * - ตั้งค่าระบบจัดการสถานะส่วนกลาง (Global State) โดยใช้ Provider
  * - กำหนดเส้นทางการใช้งานแอปพลิเคชันและการเปลี่ยนเส้นทางอัตโนมัติด้วย GoRouter
- * Author: Pattaradanai Chaitan, Purich Senasang
+ * Author: Pattaradanai Chaitan และ Purich Senasang
  * Course: Mobile Application Development Framework
  */
 
@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'firebase_options.dart';
@@ -23,7 +22,7 @@ import 'login.dart';
 
 /// จุดเริ่มต้นหลักของการทำงานในแอปพลิเคชัน
 /// 
-/// ทำหน้าที่เตรียมความพร้อมของ Framework และเริ่มการทำงานของ Root Widget
+/// ทำหน้าที่เตรียมความพร้อมของ [Framework] และเริ่มต้นการทำงานของ Root Widget
 void main() async {
   // มั่นใจว่า Flutter Framework พร้อมทำงานก่อนเรียกใช้ระบบภายนอก 
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,10 +30,10 @@ void main() async {
   // โหลดค่ากำหนดสภาพแวดล้อม (API Keys) จากไฟล์ .env
   await dotenv.load(fileName: ".env");
 
-  // เริ่มต้นการเชื่อมต่อกับระบบ Firebase 
+  // เริ่มต้นการเชื่อมต่อกับระบบ [Firebase] 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // ครอบแอปด้วย Provider เพื่อให้สามารถเข้าถึงสถานะการล็อกอินได้จากทุกส่วนของแอป 
+  // ครอบแอปด้วย [Provider] เพื่อให้สามารถเข้าถึงสถานะการล็อกอินได้จากทุกส่วนของแอป 
   runApp(
     ChangeNotifierProvider(
       create: (context) => ApplicationState(),
@@ -47,7 +46,7 @@ void main() async {
 /// 
 /// Side effects:
 /// - บังคับให้ผู้ใช้เปลี่ยนเส้นทางไปหน้า '/login' หากยังไม่ได้เข้าสู่ระบบ
-/// - ป้องกันการเข้าหน้าล็อกอินซ้ำหากผู้ใช้ยืนยันตัวตนสำเร็จแล้ว
+/// - ป้องกันการเข้าหน้าล็อกอินซ้ำหากผู้ใช้ยืนยันตัวตนสำเร็จแล้วผ่าน [ApplicationState]
 final _router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
@@ -55,7 +54,7 @@ final _router = GoRouter(
     final bool loggedIn = appState.loggedIn;
     final bool isLoggingIn = state.matchedLocation == '/login';
 
-    // ตรวจสอบเงื่อนไขการบังคับล็อกอิน
+    // ตรวจสอบเงื่อนไขการบังคับล็อกอิน (Auth Guard)
     if (!loggedIn && !isLoggingIn) return '/login';
     if (loggedIn && isLoggingIn) return '/';
 

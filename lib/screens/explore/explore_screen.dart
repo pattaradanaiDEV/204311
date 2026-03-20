@@ -9,6 +9,7 @@
  * - Pattaradanai Chaitan (รับผิดชอบส่วนระบบของ Recipe ทั้งหมด และระบบตัวกรอง Filter ของ Recipe)
  * - Purich Saenasang (รับผิดชอบปุ่มสลับโหมด Job/Recipe, ระบบของ Job ทั้งหมด และระบบตัวกรอง Filter ของ Job)
  * Notes: UI ในหน้า Explore และส่วนช่อง Search ถูกออกแบบและพัฒนาร่วมกัน
+ * Course: Mobile Application Development Framework
  */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

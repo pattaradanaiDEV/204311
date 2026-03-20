@@ -5,6 +5,7 @@
  * - แสดงตัวเลือกให้ผู้ใช้เลือกว่าจะโพสต์ Recipe หรือ Job
  * - นำทางผู้ใช้ไปยังหน้าจอสร้างเนื้อหาที่เกี่ยวข้องเมื่อกดเลือก
  * Author: Pattaradanai Chaitan และ Purich Saenasang (ร่วมกันคิดและออกแบบฟีเจอร์นี้)
+ * Course: Mobile Application Development Framework
  */
 
 import 'package:flutter/material.dart';

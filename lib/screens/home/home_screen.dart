@@ -9,6 +9,7 @@
  * - Pattaradanai Chaitan (รับผิดชอบส่วนของระบบสูตรอาหารทั้งหมด และระบบ Trending ของสูตรอาหาร)
  * - Purich Saenasang (รับผิดชอบปุ่มสลับโหมดการโชว์ Job/Recipe, ระบบของประกาศรับสมัครงานทั้งหมด และ UI โครงสร้างหลัก)
  * Notes: UI ของรูปโปรไฟล์บริเวณ AppBar ถูกออกแบบและพัฒนาร่วมกัน
+ * Course: Mobile Application Development Framework
  */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
