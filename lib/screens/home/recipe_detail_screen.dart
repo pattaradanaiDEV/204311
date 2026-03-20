@@ -6,6 +6,7 @@
  * - จัดการระบบการกดถูกใจ (Like) และแสดงรายการรีวิว
  * - มีระบบให้ผู้ใช้งานประเมินคะแนน (Rating) และเขียนรีวิว (Review) สำหรับสูตรอาหาร
  * Author: Pattaradanai Chaitan
+ * Course: Mobile Application Development Framework
  */
 
 import 'package:flutter/material.dart';

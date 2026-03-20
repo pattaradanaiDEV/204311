@@ -1,0 +1,292 @@
+/*
+ * File: job_detail_screen.dart
+ * Description: Screen, show details of Job.
+ * Responsibilities:
+ * - สามารถแสดงรูป, ชื่องาน, แท็ก, รายละเอียด และความต้องการ
+ * - จัดการการกด saved
+ * - สามารถกดลบโพสต์ได้เมื่อเป็นเจ้าของ
+ * Author: Purich Senasang
+ * Course: Mobile Application Development Framework
+ */
+
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+/// หน้าจอแสดงรายละเอียดของงาน (Job Detail) ในระบบ MannotRobot 
+/// 
+/// ทำหน้าที่แสดงข้อมูลทั้งหมดของงาน และจัดการสิทธิ์การใช้งานของผู้ใช้ 
+class JobDetailScreen extends StatefulWidget {
+  /// ข้อมูลรายละเอียดของงานที่ส่งมาจากหน้าก่อนหน้า 
+  final Map<String, dynamic> jobData;
+  
+  /// ไอดีอ้างอิงของเอกสารใน Firestore 
+  final String jobId;
+
+  const JobDetailScreen({
+    super.key,
+    required this.jobData,
+    required this.jobId,
+  });
+
+  @override
+  State<JobDetailScreen> createState() => _JobDetailScreenState();
+}
+
+class _JobDetailScreenState extends State<JobDetailScreen> {
+  bool isBookmarked = false;
+  final user = FirebaseAuth.instance.currentUser;
+
+  /// ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของโพสต์นี้หรือไม่ 
+  bool get isOwner {
+    return user != null && widget.jobData['userId'] == user!.uid;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    List<dynamic> likesList = widget.jobData['likes'] ?? [];
+    if (user != null) {
+      isBookmarked = likesList.contains(user!.uid);
+    }
+  }
+
+  /// สลับสถานะการบุ๊กมาร์กงาน (Like/Unlike)
+  /// 
+  /// Side effects: 
+  /// - อัปเดตรายชื่อ [userId] ในฟิลด์ 'likes' บน Firestore 
+  /// - แจ้งเตือน UI ให้วาดใหม่ตามสถานะล่าสุด 
+  void _toggleBookmark() async {
+    if (user == null) return;
+    setState(() => isBookmarked = !isBookmarked);
+    DocumentReference docRef = FirebaseFirestore.instance
+        .collection('jobs')
+        .doc(widget.jobId);
+    if (isBookmarked) {
+      await docRef.update({'likes': FieldValue.arrayUnion([user!.uid])});
+    } else {
+      await docRef.update({'likes': FieldValue.arrayRemove([user!.uid])});
+    }
+  }
+
+  /// แสดงกล่องข้อความยืนยันเพื่อลบโพสต์งานออกจากระบบ 
+  /// 
+  /// จะทำการลบข้อมูลใน [Firestore] และย้อนกลับไปยังหน้าก่อนหน้าเมื่อเสร็จสิ้น 
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            title: const Text("Delete Post"),
+            content: const Text("Are you sure you want to delete this post?"),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel")),
+              TextButton(
+                onPressed: () async {
+                  await FirebaseFirestore.instance.collection('jobs').doc(
+                      widget.jobId).delete();
+                  if (mounted) {
+                    Navigator.pop(context); 
+                    Navigator.pop(context); 
+                  }
+                },
+                child: const Text(
+                    "Delete", style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.jobData;
+    final String imageUrl = data['imageUrl'] ??
+        'https://via.placeholder.com/400x300';
+    const imageHeight = 320.0;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: imageHeight,
+            child: Image.network(imageUrl, fit: BoxFit.cover),
+          ),
+          Positioned.fill(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: imageHeight - 30),
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(30)),
+                    ),
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['title'] ?? 'Job Title',
+                          style: const TextStyle(fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A2B4C)),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          data['companyName'] ?? 'Company Name',
+                          style: TextStyle(fontSize: 18, color: Colors.blue
+                              .shade700, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            _buildTag(data['jobType'] ?? 'Full-time',
+                                Colors.blue),
+                            const SizedBox(width: 8),
+                            _buildTag('Restaurant', Colors.green),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(child: _buildInfoItem(
+                                Icons.location_on_outlined, 'Location',
+                                data['location'] ?? 'N/A')),
+                            Expanded(child: _buildInfoItem(
+                                Icons.payments_outlined, 'Salary',
+                                data['salaryRange'] ?? 'N/A')),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        const Text('Job Description', style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        Text(
+                          data['description'] ?? 'No description provided.',
+                          style: TextStyle(color: Colors.grey.shade800,
+                              height: 1.6,
+                              fontSize: 15),
+                        ),
+                        const SizedBox(height: 32),
+                        const Text('Requirements', style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        ...(data['requirements'] as List<dynamic>? ?? [])
+                            .map((req) => _buildRequirementItem(req.toString()))
+                            .toList(),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildCircularButton(
+                    Icons.arrow_back, () => Navigator.pop(context)),
+                Row(
+                  children: [
+                    _buildCircularButton(
+                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                      _toggleBookmark,
+                      color: isBookmarked ? Colors.blue : Colors.black,
+                    ),
+                    const SizedBox(width: 12),
+                    if (isOwner) ...[
+                      _buildCircularButton(Icons.delete_outline, _confirmDelete,
+                          color: Colors.red),
+                      const SizedBox(width: 12),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildCircularButton(IconData icon, VoidCallback onPressed,
+      {Color color = Colors.black}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        customBorder: const CircleBorder(),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)
+            ],
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTag(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12)),
+      child: Text(text, style: TextStyle(
+          color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildInfoItem(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.grey.shade400, size: 28),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+            Text(value, style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 14)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRequirementItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle, color: Colors.blue, size: 20),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: TextStyle(
+              color: Colors.grey.shade800, height: 1.4, fontSize: 15))),
+        ],
+      ),
+    );
+  }
+}

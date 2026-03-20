@@ -5,6 +5,7 @@
  * - กำหนดโครงสร้าง Attribute ของสูตรอาหาร
  * - จัดการการแปลงข้อมูลกับ Firestore
  * Author: Pattaradanai Chaitan
+ * Course: Mobile Application Development Framework
  */
 import 'package:cloud_firestore/cloud_firestore.dart';
 
