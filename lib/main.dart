@@ -5,7 +5,7 @@
  * - เริ่มต้นการทำงานของ Flutter Framework, Firebase และการตั้งค่าสภาพแวดล้อมต่างๆ
  * - ตั้งค่าระบบจัดการสถานะส่วนกลาง (Global State) โดยใช้ Provider
  * - กำหนดเส้นทางการใช้งานแอปพลิเคชันและการเปลี่ยนเส้นทางอัตโนมัติด้วย GoRouter
- * Author: Purich Senasang
+ * Author: Pattaradanai Chaitan, Purich Senasang
  * Course: Mobile Application Development Framework
  */
 

@@ -4,7 +4,8 @@
  * Responsibilities:
  * - ดูหน้าของ recipe/job ได้ ว่ามีการ์ดที่กดถูกใจมีอะไรบ้าง
  * - สามารถกดปุ่มถูกใจ/เซฟ ซ้ำ เมื่อสลับกลับมาใหม่การ์ดที่ถูกใจจะหายไป
- * Author: Purich Senasang
+ * Author: Purich Senasang(ทำทั้ง recipe และ job)
+ * Co-Author: Pattaradanai Chaitan(ทำในส่วน recipe)
  * Course: Mobile Application Development Framework
  */
 
@@ -14,14 +15,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../home/recipe_detail_screen.dart';
 import '../home/job_detail_screen.dart';
 
-/// หน้าจอสำหรับแสดงรายการสูตรอาหารและงานที่ผู้ใช้กดบันทึก (Saved/Liked) ไว้
+/// หน้าจอสำหรับแสดงรายการสูตรอาหารและงานที่ผู้ใช้กดบันทึกไว้
 /// 
-/// ผู้ใช้สามารถสลับโหมดการดูระหว่าง 'Recipes' และ 'Jobs' ได้ผ่านแท็บด้านบน
+/// ผู้ใช้สามารถสลับโหมดการดูระหว่าง 'Recipes' และ 'Jobs' ได้ผ่านแท็บควบคุมสถานะ
 class SavedScreen extends StatefulWidget {
   /// ว่าปัจจุบันอยู่ในโหมดแสดงสูตรอาหารหรือไม่
   final bool isRecipeMode;
   
-  /// ฟังก์ชัน Callback สำหรับแจ้งการเปลี่ยนแปลงโหมดการแสดงผล
+  /// ฟังก์ชันแจ้งเตือนเมื่อมีการสลับโหมดการแสดงผลในหน้าจอ
   final ValueChanged<bool> onModeChanged;
 
   const SavedScreen({
@@ -35,7 +36,7 @@ class SavedScreen extends StatefulWidget {
 }
 
 class _SavedScreenState extends State<SavedScreen> {
-  /// ข้อมูลผู้ใช้ปัจจุบันที่ล็อกอินเข้าสู่ระบบ
+  /// ข้อมูลผู้ใช้ปัจจุบันที่ดึงมาจาก [FirebaseAuth]
   final user = FirebaseAuth.instance.currentUser;
 
   @override
@@ -133,10 +134,10 @@ class _SavedScreenState extends State<SavedScreen> {
     );
   }
 
-  /// สร้าง Grid แสดงรายการสูตรอาหารที่ผู้ใช้ปัจจุบันกดถูกใจไว้
+  /// สร้างรายการสูตรอาหารที่ผู้ใช้กดถูกใจไว้ในรูปแบบตาราง (Grid)
   /// 
-  /// ใช้ [StreamBuilder] เพื่อดึงข้อมูลแบบ Real-time จากคอลเลกชัน 'recipes'
-  /// โดยกรองเฉพาะเอกสารที่มี [user.uid] อยู่ในฟิลด์ 'likes'
+  /// ใช้ [StreamBuilder] เพื่อเชื่อมต่อกับคอลเลกชัน 'recipes' ใน [Firestore] 
+  /// และกรองข้อมูลตามไอดีของผู้ใช้ที่ปรากฏในรายการ 'likes'
   Widget _buildSavedRecipesGrid() {
     if (user == null) return const Center(child: Text("กรุณาเข้าสู่ระบบ"));
 
@@ -195,9 +196,9 @@ class _SavedScreenState extends State<SavedScreen> {
     );
   }
 
-  /// สร้าง Grid แสดงรายการงานที่ผู้ใช้ปัจจุบันกดบันทึกไว้
+  /// สร้างรายการงานที่ผู้ใช้กดบันทึกไว้ในรูปแบบตาราง (Grid)
   /// 
-  /// ใช้ [StreamBuilder] เพื่อดึงข้อมูลแบบ Real-time จากคอลเลกชัน 'jobs'
+  /// ดึงข้อมูลแบบเรียลไทม์จากคอลเลกชัน 'jobs' โดยพิจารณาจาก [user.uid]
   Widget _buildSavedJobsGrid() {
     if (user == null) return const Center(child: Text("กรุณาเข้าสู่ระบบ"));
 
@@ -256,6 +257,7 @@ class _SavedScreenState extends State<SavedScreen> {
       },
     );
   }
+
 
   Widget _buildItemCard({
     required String title,

@@ -9,20 +9,29 @@
  */
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// ข้อมูลประกาศรับสมัครงานในระบบ MannotRobot
+///
+/// คลาสนี้ใช้สำหรับกำหนดโครงสร้างข้อมูลของงาน รวมถึงการแปลงข้อมูล
+/// ระหว่างรูปแบบ [Map] ของ Firestore และอินสแตนซ์ของ [Job]
 class Job {
-  final String? id; // Document ID ใน Firestore
+  /// ไอดีอ้างอิงเอกสารในฐานข้อมูล Firestore
+  final String? id;
+  
   final String userId;
   final String recruiterName;
   final String companyName;
   final String title;
-  final String jobType; // Full-time, Part-time, etc.
-  final String salaryRange; // e.g., "$60k - $75k"
+  final String jobType;
+  final String salaryRange;
   final String location;
   final String description;
   final List<String> requirements;
   final String logoUrl;
   final String imageUrl;
-  final List<String> likes; // เก็บ UserID ของคนที่กดเซฟงาน
+  
+  /// รายชื่อไอดีผู้ใช้งานที่กดบันทึกงานนี้ไว้
+  final List<String> likes;
+  
   final DateTime? createdAt;
 
   Job({
@@ -42,7 +51,10 @@ class Job {
     this.createdAt,
   });
 
-  // แปลงจาก Firestore Map เป็น Object
+  /// สร้างอินสแตนซ์ [Job] จากข้อมูล [map] ที่ดึงมาจาก Firestore
+  ///
+  /// รับข้อมูล [id] ซึ่งเป็น Document ID และ [map] ที่มีข้อมูลของงาน
+  /// หากฟิลด์ใดไม่มีข้อมูล ระบบจะกำหนดค่าเริ่มต้นที่เหมาะสมให้
   factory Job.fromMap(String id, Map<String, dynamic> map) {
     return Job(
       id: id,
@@ -62,7 +74,9 @@ class Job {
     );
   }
 
-  // แปลง Object เป็น Map เพื่อบันทึกลง Firestore
+  /// ส่งคืนข้อมูลของ [Job] ในรูปแบบ [Map] เพื่อจัดเก็บลงใน Firestore
+  ///
+  /// ฟังก์ชันนี้จะรวมค่า [FieldValue.serverTimestamp] เพื่อระบุเวลาที่บันทึกข้อมูล
   Map<String, dynamic> toMap() {
       return {
         'userId': userId,

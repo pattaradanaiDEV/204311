@@ -1,10 +1,10 @@
 /*
  * File: create_job_screen.dart
- * Description: Screen, show details of Job.
+ * Description: หน้าจอสำหรับสร้างและลงประกาศรับสมัครงานใหม่
  * Responsibilities:
  * - รับข้อมูลรายละเอียดงาน (ชื่อ, ตำแหน่ง, เงินเดือน, สถานที่, ความต้องการ)
- * - สามารถเพิ่ม/ลบ requirements ได้หากยังไม่กด post
- * - สามารถอับรูปปกงาน และบันทึกข้อมูลลงใน database
+ * - จัดการการเพิ่มและลบรายการความต้องการ (Requirements) แบบไดนามิก
+ * - ดำเนินการอัปโหลดรูปภาพแบนเนอร์และบันทึกข้อมูลลงฐานข้อมูล [Firestore]
  * Author: Purich Senasang
  * Course: Mobile Application Development Framework
  */
@@ -12,14 +12,13 @@
 import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart'; 
 import '../../services/firestore_service.dart';
 import '../../models/job.dart';
 
-/// หน้าจอสำหรับสร้างและโพสต์ประกาศรับสมัครงานใหม่ในระบบ MannotRobot 
+/// หน้าจอสำหรับสร้างประกาศรับสมัครงานในระบบ MannotRobot 
 /// 
-/// ทำหน้าที่รับข้อมูลจากผู้ใช้ ตรวจสอบความถูกต้อง และบันทึกข้อมูลลงในฐานข้อมูล 
+/// ทำหน้าที่รับข้อมูลจากผู้ใช้ ตรวจสอบความถูกต้องเบื้องต้น และบันทึกข้อมูลลงฐานข้อมูล
 class CreateJobScreen extends StatefulWidget {
   const CreateJobScreen({super.key});
 
@@ -40,19 +39,19 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   /// ลำดับของประเภทงานที่ถูกเลือกจาก [jobTypes] 
   int jobTypeIndex = 0;
   
-  /// รายการตัวเลือกประเภทการจ้างงาน 
+  /// รายการตัวเลือกประเภทการจ้างงานที่มีให้เลือกในแอป
   final List<String> jobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship'];
   
-  /// รายการคุณสมบัติหรือความต้องการของผู้สมัคร 
+  /// รายการคุณสมบัติหรือความต้องการที่ผู้ใช้เพิ่มเข้ามา
   List<String> requirements = [];
 
-  /// ไฟล์รูปภาพที่ผู้ใช้เลือกสำหรับเป็นภาพปกงาน
+  /// ไฟล์รูปภาพแบนเนอร์ที่ผู้ใช้เลือกจากคลังภาพ
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void dispose() {
-    /// คืนทรัพยากรให้กับระบบเมื่อ Widget ถูกทำลาย 
+    /// คืนทรัพยากรให้กับระบบโดยการทำลาย [TextEditingController] เมื่อไม่ได้ใช้งาน
     _titleController.dispose();
     _companyController.dispose();
     _minSalaryController.dispose();
@@ -64,7 +63,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
 
   /// เริ่มต้นกระบวนการเลือกรูปภาพจากคลังภาพในเครื่อง (Gallery) 
   /// 
-  /// เมื่อเลือกรูปสำเร็จ จะทำการอัปเดตสถานะของ [_imageFile] เพื่อแสดงผลบน UI 
+  /// เมื่อเลือกรูปสำเร็จ จะทำการอัปเดตสถานะของ [_imageFile] เพื่อแสดงผลตัวอย่างบน UI 
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -74,14 +73,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
     }
   }
 
-  /// จัดการการส่งข้อมูลประกาศงานขึ้นระบบ Firebase 
+  /// ดำเนินการส่งข้อมูลประกาศงานขึ้นระบบ [Firebase] 
   /// 
   /// [Side effects]: 
-  /// - อัปโหลดรูปภาพไปยัง Storage และบันทึกข้อมูลลงใน Firestore 
-  /// - แสดง SnackBar แจ้งเตือนผลการทำงานและปิดหน้าจอปัจจุบัน 
+  /// - อัปโหลดรูปภาพไปยัง Storage และบันทึกเอกสารงานใหม่ลงใน [Firestore] 
+  /// - แสดง SnackBar แจ้งเตือนสถานะความสำเร็จและย้อนกลับไปยังหน้าก่อนหน้า 
   /// 
   /// [Failure mode]:
-  /// - แสดงข้อความแจ้งเตือนหากผู้ใช้ยังไม่ได้เข้าสู่ระบบหรือกรอกข้อมูลไม่ครบ 
+  /// - แสดงข้อความแจ้งเตือนหากผู้ใช้ยังไม่ได้เข้าสู่ระบบหรือกรอกข้อมูลสำคัญไม่ครบ 
   Future<void> _handlePostJob() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -105,7 +104,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
 
     try {
       if (_imageFile != null) {
-        // อัปโหลดรูปภาพผ่าน [_firestoreService] 
+        // อัปโหลดรูปภาพผ่านบริการของ [_firestoreService]
         String? uploadedUrl = await _firestoreService.uploadImage(_imageFile!);
         if (uploadedUrl != null) {
           finalImageUrl = uploadedUrl;
@@ -129,8 +128,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
 
       await _firestoreService.addJob(newJob);
       if (mounted) {
-        Navigator.pop(context); // ปิด Loading
-        Navigator.pop(context); // ปิดหน้า Post
+        Navigator.pop(context); // ปิดหน้าจอ Loading
+        Navigator.pop(context); // ปิดหน้าจอสร้างโพสต์
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("โพสต์ประกาศสำเร็จ!")));
       }
     } catch (e) {
@@ -141,6 +140,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // UI Layout Code
     final user = FirebaseAuth.instance.currentUser;
     final String displayName = user?.displayName ?? "Anonymous";
     final String photoUrl = user?.photoURL ?? "";
@@ -311,7 +311,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
     );
   }
 
-  // --- Helper Widgets ---
+
   Widget _buildSectionTitle(String title) {
     return Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1A2B4C))));
   }

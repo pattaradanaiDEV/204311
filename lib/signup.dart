@@ -1,11 +1,11 @@
 /*
  * File: signup.dart
- * Description: ผู้ใช้งานสมัครข้อมูลที่หน้านี้
+ * Description: หน้าจอสำหรับลงทะเบียนผู้ใช้ใหม่ (Sign-up)
  * Responsibilities:
- * - Collects user information (Name, Email, Password) for new account creation.
- * - Handles Firebase Authentication process and profile updates.
- * - Manages loading states and input validation feedback.
- * Author: Purich Senasang
+ * - รวบรวมข้อมูลชื่อ อีเมล และรหัสผ่านเพื่อสร้างบัญชีใหม่ในระบบ
+ * - ดำเนินการลงทะเบียนและอัปเดตข้อมูลผู้ใช้ผ่าน Firebase Authentication
+ * - จัดการสถานะการรอโหลด (Loading state) และการตอบสนองต่อข้อมูลที่ไม่ถูกต้อง
+ * Author: Pattaradanai Chaitan และ Purich Senasang
  * Course: Mobile Application Development Framework
  */
 
@@ -15,7 +15,7 @@ import 'package:go_router/go_router.dart';
 
 /// หน้าจอสำหรับลงทะเบียนผู้ใช้ใหม่ในระบบ MannotRobot
 /// 
-/// ทำหน้าที่รับข้อมูลพื้นฐาน ตรวจสอบความถูกต้อง และสร้างบัญชีผู้ใช้ใน Firebase
+/// ทำหน้าที่รับข้อมูลพื้นฐาน ตรวจสอบความถูกต้อง และสร้างบัญชีผู้ใช้ใน [Firebase]
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -34,7 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
-    /// คืนทรัพยากรให้กับระบบเมื่อ Widget ถูกทำลาย
+    /// คืนทรัพยากรให้กับระบบโดยการทำลาย [TextEditingController] เมื่อ Widget ถูกทำลาย
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -45,12 +45,12 @@ class _SignUpPageState extends State<SignUpPage> {
   /// ดำเนินการสร้างบัญชีผู้ใช้ใหม่ผ่าน [FirebaseAuth]
   /// 
   /// Side effects:
-  /// - สร้าง User Credential ในฐานข้อมูล Firebase Auth
-  /// - อัปเดต Display Name ของผู้ใช้ตามข้อมูลที่กรอก
-  /// - นำทางผู้ใช้ไปยังหน้าหลัก '/' เมื่อการสมัครเสร็จสิ้น
+  /// - สร้างข้อมูลผู้ใช้ใหม่ (User Credential) ในระบบ [Firebase Auth]
+  /// - อัปเดตชื่อที่ใช้แสดง (Display Name) ของผู้ใช้ตามข้อมูลใน [_nameController]
+  /// - นำทางผู้ใช้ไปยังหน้าหลัก '/' ผ่าน [GoRouter] เมื่อการสมัครเสร็จสิ้น
   /// 
   /// [Failure mode]:
-  /// - แสดง SnackBar แจ้งเตือนหากรหัสผ่านไม่ตรงกันหรือเกิดข้อผิดพลาดจาก Firebase
+  /// - แสดง SnackBar แจ้งเตือนหากรหัสผ่านไม่ตรงกันหรือเกิดข้อผิดพลาดจากระบบ [Firebase]
   Future<void> _signUp() async {
     if (_passwordController.text != _confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,14 +64,14 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     try {
-      // สร้างบัญชีผู้ใช้ใหม่
+      // สร้างบัญชีผู้ใช้ใหม่ด้วยอีเมลและรหัสผ่าน
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
 
-      // ตั้งค่าชื่อที่แสดงบนโปรไฟล์
+      // ตั้งค่าชื่อที่แสดงบนโปรไฟล์ผู้ใช้
       await userCredential.user?.updateDisplayName(_nameController.text.trim());
 
       if (mounted) context.go('/');
@@ -92,7 +92,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    // UI Layout ไม่ต้องใส่ Doc Comment ตามหลักเกณฑ์หน้า 21
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       body: SingleChildScrollView(
@@ -211,7 +210,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Helper Widget สำหรับสร้างช่องกรอกข้อมูล (Private method)
+
   Widget _buildField(
     String label,
     String hint,

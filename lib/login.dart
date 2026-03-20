@@ -1,12 +1,12 @@
 /*
- * File: login_page.dart
- * Description: ผู้ใช้งาน login ผ่านหน้านี้
+ * File: login.dart
+ * Description: หน้าจอเข้าสู่ระบบสำหรับผู้ใช้งานแอปพลิเคชัน
  * Responsibilities:
- * - สามารถใช้อีเมลที่สมัคร และรหัสผ่าน login เข้ามาได้
- * - สามารถกดไปหน้า sign-up ได้จากหน้า login
- * - ทำให้เปิด/ปิด การมองเห็นรหัสผ่านได้
- * - นำไปสู่หน้า home ได้เมื่อ login สำเร็จ
- * Author: Pattaradanai Chaitan และ Purich Senasang(จัดการปุ่มมองเห็นรหัสผ่าน)
+ * - ตรวจสอบสิทธิ์การเข้าใช้งานผ่านอีเมลและรหัสผ่าน
+ * - เชื่อมโยงไปยังหน้าสมัครสมาชิก (Sign-up) สำหรับผู้ใช้ใหม่
+ * - จัดการสถานะการเปิด/ปิด การมองเห็นรหัสผ่าน (Password Visibility)
+ * - นำทางผู้ใช้ไปยังหน้าหลักเมื่อยืนยันตัวตนสำเร็จ
+ * Author: Pattaradanai Chaitan และ Purich Senasang (จัดการปุ่มมองเห็นรหัสผ่าน)
  * Course: Mobile Application Development Framework
  */
 
@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    /// คืนทรัพยากรให้กับระบบเมื่อไม่มีการใช้งาน Controller แล้ว
+    /// คืนทรัพยากรให้กับระบบโดยการทำลาย [TextEditingController] เมื่อไม่มีการใช้งานแล้ว
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
   /// 
   /// Side effects:
   /// - หากสำเร็จ จะทำการล้างหน้าจอเดิมและนำผู้ใช้ไปยัง [MainLayout]
-  /// - แจ้งเตือนสถานะความผิดพลาดผ่านบล็อก catch (ถ้ามี)
+  /// - บันทึกสถานะการล็อกอินลงในหน่วยความจำของระบบ [Firebase]
   Future<void> _login() async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -60,13 +60,12 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
-      // สามารถเพิ่ม SnackBar แจ้งเตือน Error ตรงนี้ได้ในอนาคต
+      // ในอนาคตสามารถเพิ่มการแสดง SnackBar เพื่อแจ้งเตือนข้อผิดพลาดที่นี่
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Overridden methods ไม่ต้องใส่ Doc Comment ตามเกณฑ์หน้า 21
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -75,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               const SizedBox(height: 80),
-              // ส่วนแสดงโลโก้แอป
               Center(
                 child: Container(
                   width: 100,
@@ -164,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Helper Widget สำหรับสร้างช่องกรอกข้อมูล (Private method)
+
   Widget _buildTextField({
     required String label,
     required String hint,

@@ -1,6 +1,6 @@
 /*
  * File: job_detail_screen.dart
- * Description: Screen, show details of Job.
+ * Description: หน้าจอแสดงรายละเอียดข้อมูลของงาน
  * Responsibilities:
  * - สามารถแสดงรูป, ชื่องาน, แท็ก, รายละเอียด และความต้องการ
  * - จัดการการกด saved
@@ -13,14 +13,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// หน้าจอแสดงรายละเอียดของงาน (Job Detail) ในระบบ MannotRobot 
+/// หน้าจอแสดงรายละเอียดของงานในระบบ MannotRobot 
 /// 
-/// ทำหน้าที่แสดงข้อมูลทั้งหมดของงาน และจัดการสิทธิ์การใช้งานของผู้ใช้ 
+/// ทำหน้าที่แสดงข้อมูลทั้งหมดของงาน และจัดการสิทธิ์การใช้งานของผู้ใช้เบื้องต้น
 class JobDetailScreen extends StatefulWidget {
   /// ข้อมูลรายละเอียดของงานที่ส่งมาจากหน้าก่อนหน้า 
   final Map<String, dynamic> jobData;
   
-  /// ไอดีอ้างอิงของเอกสารใน Firestore 
+  /// ไอดีอ้างอิงของเอกสารใน [Firestore] 
   final String jobId;
 
   const JobDetailScreen({
@@ -37,7 +37,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   bool isBookmarked = false;
   final user = FirebaseAuth.instance.currentUser;
 
-  /// ตรวจสอบว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของโพสต์นี้หรือไม่ 
+  /// ว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าของโพสต์นี้หรือไม่ 
   bool get isOwner {
     return user != null && widget.jobData['userId'] == user!.uid;
   }
@@ -51,11 +51,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
   }
 
-  /// สลับสถานะการบุ๊กมาร์กงาน (Like/Unlike)
+  /// สลับสถานะการบุ๊กมาร์กงานระหว่าง Like หรือ Unlike
   /// 
   /// Side effects: 
-  /// - อัปเดตรายชื่อ [userId] ในฟิลด์ 'likes' บน Firestore 
-  /// - แจ้งเตือน UI ให้วาดใหม่ตามสถานะล่าสุด 
+  /// - อัปเดตรายชื่อ [userId] ในฟิลด์ 'likes' บนเอกสารใน [Firestore] 
+  /// - สั่งให้ UI วาดหน้าจอใหม่ตามสถานะการบุ๊กมาร์กล่าสุด 
   void _toggleBookmark() async {
     if (user == null) return;
     setState(() => isBookmarked = !isBookmarked);
@@ -71,7 +71,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   /// แสดงกล่องข้อความยืนยันเพื่อลบโพสต์งานออกจากระบบ 
   /// 
-  /// จะทำการลบข้อมูลใน [Firestore] และย้อนกลับไปยังหน้าก่อนหน้าเมื่อเสร็จสิ้น 
+  /// ดำเนินการลบข้อมูลเอกสารใน [Firestore] และย้อนกลับไปยังหน้าก่อนหน้าเมื่อเสร็จสิ้น 
   void _confirmDelete() {
     showDialog(
       context: context,
@@ -101,6 +101,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Overridden methods ไม่ต้องใส่คอมเมนต์ตามเกณฑ์หน้า 21
     final data = widget.jobData;
     final String imageUrl = data['imageUrl'] ??
         'https://via.placeholder.com/400x300';
